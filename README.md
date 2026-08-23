@@ -6,6 +6,18 @@
 
 ## Skills
 
+### `artifact-boundary-review`
+
+在最终交付前审查代码、文档、UI、测试、配置、提交和 PR 等持久化产物，避免把中间尝试、纠错过程或临时约束误写进最终结果。
+
+主要行为：
+
+- 以当前有效需求、目标读者和实际变更为审查基准。
+- 区分表达最终状态、真实变化和必要过程的不同产物。
+- 使用语义判断识别边界问题，不依赖关键词或历史错误清单。
+- 在既有授权内最小修复本任务引入的明确问题；只读审查时仅报告建议。
+- 不替代功能测试、构建、视觉检查、安全审查或领域验证。
+
 ### `codex-session-cleanup`
 
 按截止日期盘点并清理项目less Codex 任务产生的本地目录，重点防止误删仍被任务引用、正在运行或包含未保存 Git 工作的目录。
@@ -34,6 +46,7 @@ git clone https://github.com/Magic-Xu/MagicDailySkills.git
 
 ```bash
 mkdir -p ~/.agents/skills
+ln -s /absolute/path/MagicDailySkills/artifact-boundary-review ~/.agents/skills/artifact-boundary-review
 ln -s /absolute/path/MagicDailySkills/codex-session-cleanup ~/.agents/skills/codex-session-cleanup
 ```
 
@@ -46,6 +59,12 @@ git -C /absolute/path/MagicDailySkills pull --ff-only
 ```
 
 ## 使用
+
+交付前检查本次产物：
+
+```text
+$artifact-boundary-review 检查本次交付产物并修复明确的边界问题
+```
 
 先只读盘点：
 
@@ -72,6 +91,10 @@ $codex-session-cleanup 仅盘点 2026-08-01 之前的会话目录，根目录是
 ```text
 MagicDailySkills/
 ├── README.md
+├── artifact-boundary-review/
+│   ├── SKILL.md
+│   └── agents/
+│       └── openai.yaml
 └── codex-session-cleanup/
     ├── SKILL.md
     └── agents/

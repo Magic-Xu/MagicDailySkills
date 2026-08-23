@@ -1,0 +1,4 @@
+interface:
+  display_name: "产物边界检查"
+  short_description: "交付前检查产物是否只表达最终有效需求、真实状态与实际变化"
+  default_prompt: "使用 $artifact-boundary-review 检查本次交付产物并修复明确的边界泄漏。"
