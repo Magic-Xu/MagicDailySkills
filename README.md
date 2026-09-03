@@ -20,17 +20,18 @@
 
 ### `codex-session-cleanup`
 
-按截止日期盘点并清理项目less Codex 任务产生的本地目录，重点防止误删仍被任务引用、正在运行或包含未保存 Git 工作的目录。
+按截止日期盘点 projectless Codex 任务产生的本地目录，并把确认可清理的目录移入 macOS 回收站，重点保护仍被任务引用、正在运行或包含未保存 Git 工作的目录。
 
 主要行为：
 
 - 默认使用当前用户的 `Documents/Codex`，也可在请求中指定其他根目录。
 - 使用任务最后更新时间，而不是目录名或文件修改时间判断新旧。
-- 已归档且通过安全检查的目录可直接清理。
+- 结合本机状态库与实时任务状态建立完整引用映射，避免受最近任务列表数量限制影响。
+- 已归档且通过安全检查的目录可直接移入回收站，并生成可核对的 `manifest.json`。
 - 未归档、孤儿目录或包含未保存 Git 工作的目录必须确认。
-- 正在运行的任务、符号链接、Git worktree 和带 `.codex-keep` 的目录不会删除。
-- 支持“仅盘点”“预览”和 `dry run`，不执行任何写入。
-- 只删除本地工作目录，不永久删除 Codex App 中的任务记录。
+- 正在运行的任务、符号链接、Git worktree 和带 `.codex-keep` 的目录不会移动。
+- “仅盘点”“预览”和 `dry run` 不执行任何写入。
+- App 中的任务记录仍然保留；移入回收站的目录在清空回收站后才会永久删除并释放空间。
 
 该 Skill 需要能列出、归档 Codex 任务并操作本地文件的 Codex 桌面环境。缺少所需任务工具时，它会停止，不会根据目录名猜测任务状态。
 
@@ -84,7 +85,7 @@ $codex-session-cleanup 清理 2026-08-01 之前的本地 Codex 会话目录
 $codex-session-cleanup 仅盘点 2026-08-01 之前的会话目录，根目录是 /absolute/path/to/Codex
 ```
 
-删除是永久操作。首次使用或调整清理根目录后，建议先运行“仅盘点”。
+首次使用或调整清理根目录后，建议先运行“仅盘点”。执行清理后可根据批次目录和 `manifest.json` 二次审查，再决定是否清空回收站。
 
 ## 目录结构
 
@@ -97,8 +98,13 @@ MagicDailySkills/
 │       └── openai.yaml
 └── codex-session-cleanup/
     ├── SKILL.md
-    └── agents/
-        └── openai.yaml
+    ├── agents/
+    │   └── openai.yaml
+    ├── scripts/
+    │   ├── inventory.py
+    │   └── move_to_trash.py
+    └── tests/
+        └── test_scripts.py
 ```
 
 每个一级子目录都是一个独立 Skill，以其中的 `SKILL.md` 作为运行指令入口。
