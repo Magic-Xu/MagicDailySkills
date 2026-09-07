@@ -29,4 +29,3 @@
 来源：[独立 App 开发系列：如何托管隐私政策和用户协议](https://magic-xu.github.io/writing/indie-developer-app-privacy-policy-hosting/)，2026-05-05。
 
 这里直接解释选择的原因，后文用广告、付费等实际能力说明为什么文案需要随产品更新。
-
