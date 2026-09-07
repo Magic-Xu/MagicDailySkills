@@ -1,4 +1,0 @@
-interface:
-  display_name: "MagicTune"
-  short_description: "用 Magic 的个人表达起草与校准文章，保持事实、判断和语气一致"
-  default_prompt: "用 $magic-tune 将这份实践素材整理成网站母稿，再改编为公众号稿。"
