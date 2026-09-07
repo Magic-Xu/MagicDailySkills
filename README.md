@@ -35,15 +35,15 @@
 
 该 Skill 需要能列出、归档 Codex 任务并操作本地文件的 Codex 桌面环境。缺少所需任务工具时，它会停止，不会根据目录名猜测任务状态。
 
-### `magic-tune`
+### `magic-tone`
 
-以 Magic 的个人表达起草、改写和校准文章：从具体实践出发，保留个人判断、事实依据与同行交流感。以已发表文章的摘句和表达分析作为参照，用实际文章持续校准风格。
+以 Magic 的个人表达起草、改写和校准文章：把亲历的问题转成读者可用的方法，突出真实卡点，保留作者判断。以已发表文章为参照，按读者用途取舍细节，让结尾说清作者的具体想法。
 
 ### `blog-article-format`
 
 维护网站文章母稿，按公众号、掘金等渠道调整结构、格式和素材。复用目标网站的内容 schema，区分本地草稿与已发布状态，并记录渠道稿对应的母稿版本。
 
-两个 Skill 可以协作：`magic-tune` 处理作者表达，`blog-article-format` 处理文章与渠道格式。文章和发布素材保存在目标内容仓库，Skill 仓库只保存可复用的写作指导。
+两个 Skill 可以协作：`magic-tone` 处理作者表达，`blog-article-format` 处理文章与渠道格式。文章和发布素材保存在目标内容仓库，Skill 仓库只保存可复用的写作指导。
 
 ## 安装
 
@@ -59,7 +59,7 @@ git clone https://github.com/Magic-Xu/MagicDailySkills.git
 mkdir -p ~/.agents/skills
 ln -s /absolute/path/MagicDailySkills/artifact-boundary-review ~/.agents/skills/artifact-boundary-review
 ln -s /absolute/path/MagicDailySkills/codex-session-cleanup ~/.agents/skills/codex-session-cleanup
-ln -s /absolute/path/MagicDailySkills/magic-tune ~/.agents/skills/magic-tune
+ln -s /absolute/path/MagicDailySkills/magic-tone ~/.agents/skills/magic-tone
 ln -s /absolute/path/MagicDailySkills/blog-article-format ~/.agents/skills/blog-article-format
 ```
 
@@ -78,7 +78,7 @@ git -C /absolute/path/MagicDailySkills pull --ff-only
 起草个人文章并适配公众号：
 
 ```text
-$magic-tune 将这份独立 App 实践整理成网站母稿，再用 $blog-article-format 生成公众号稿。
+$magic-tone 将这份独立 App 实践整理成网站母稿，再用 $blog-article-format 生成公众号稿。
 ```
 
 交付前检查本次产物：
@@ -118,7 +118,7 @@ MagicDailySkills/
 │   │   └── detailed-review.md
 │   └── agents/
 │       └── openai.yaml
-├── magic-tune/
+├── magic-tone/
 │   ├── SKILL.md
 │   ├── references/voice-examples.md
 │   └── agents/openai.yaml
