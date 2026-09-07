@@ -94,6 +94,8 @@ MagicDailySkills/
 ├── README.md
 ├── artifact-boundary-review/
 │   ├── SKILL.md
+│   ├── references/
+│   │   └── detailed-review.md
 │   └── agents/
 │       └── openai.yaml
 └── codex-session-cleanup/
