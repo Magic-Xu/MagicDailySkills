@@ -27,11 +27,19 @@
 - 链接、截图、代码示例或 AI 提示词按文章的理解与复现需要选用，也可以不需要这些素材。确有需要时放在相关内容旁，复制、跳转等交互以渠道实际能力为准。
 - 用短而完整的段落推进；章节数量由叙事决定，避免每句话换行或满篇加粗。
 - 优先保留关键转折、可复用判断与有证据的结果。长配置、完整日志或大段代码可留在网站母稿，公众号保留理解和行动所需的部分。
-- 宽表格改成短清单或小段落；图表应在手机上可读。截图核对账号、邮件、订单与付款信息，使用实际获准的素材。
+- 宽表格改成短清单或小段落；图表应在手机上可读。截图核对账号、邮件、订单、付款信息及 VPN 等需隐藏内容，使用实际获准的素材。
 - 交付标题、摘要和正文。编辑记录、版本哈希、待确认项留在正文之外；正文不带网站 front matter，也不把排版说明写给读者。
-- 来源保留可识别的标题与链接；若后台不能提供所需跳转形式，按实际能力提供文末资料名称或原文入口，不能假装普通文本 URL 可点击。
+- 来源保留可识别的标题与完整地址。使用会移除外部链接的同步工具时，正文按需标注编号，文末列出对应资料名称和可复制网址；不能只剩名称，也不把普通文本网址说成可点击链接。`prepare_channel_sync.mjs` 在公众号导出时检查外部链接的地址是否也出现在可读正文中；工具行为变化后重新核验。
 
 上传或发布前，根据账号实际后台和官方规范核验当时的标题、摘要、封面、正文图片、外链、原创声明及已发布文章修改能力。没有核验时将交付称为“本地公众号稿”，不要声称通过平台校验或已进入草稿箱。
+
+## 公众号封面与摘要
+
+与渠道预览稿一起准备，放进 `/Users/magic/Documents/MagicArticle/<article-slug>/`。顶层文件名使用 `wechat-cover.png` 和 `wechat-summary.txt`，最终回复给出这两个文件的直接链接。
+
+- 封面默认做约 2.35:1 的横版，标题和主体留出裁切余量，检查缩略图可读性。需要生成或改图时使用 [imagegen](/Users/magic/.codex/skills/.system/imagegen/SKILL.md)，复用合适素材也要重新检查构图；不要把正文第一张操作截图自动当封面。
+- 摘要用一至两句说明主题和读者能获得什么，单独写完整，不直接截取正文开头。按当时后台字数限制校验；文本文件只保存可粘贴的摘要。
+- 封面是独立发布素材，不重复插入正文。原版同步助手可能不填写公众号封面、摘要，CLI 成功后仍需将素材与本次草稿链接一起交给 Magic。
 
 ## 应用身份与渠道脱敏
 
@@ -47,9 +55,91 @@
 
 用户要求时再适配。技术社区版本通常保留复现前提、版本、代码语言、关键报错和解决理由；生活或观点渠道按其读者调整背景和术语解释。平台偏好是编辑假设，平台硬约束以官方规范和当前编辑器为准，不在此固化易过时的字数上限或功能限制。
 
-## 同一主题的标题候选
+## CLI 导出与同步
 
-- 网站：独立 App 开发系列：Google Play 一次性内购，从商品配置到真机测试
-- 公众号：独立 App 开发系列：Google Play 内购配置与测试
+**同步只用 Wechatsync CLI**，入口为 `/Users/magic/.local/bin/wechatsync`。使用前读取本机 [接入说明](/Users/magic/.local/share/wechatsync/README.md)，核对已安装版本和参数。不要操作扩展弹窗同步，不用 MCP 替代 CLI，也不把复制粘贴正文、逐张上传图片交回给 Magic。
 
-后者改变切入点，不能把“测试购买成功”改写成“赚到第一笔收入”，也不能把一次性内购改成订阅。
+每个平台使用自己的已审查稿，分别同步。目标平台显式指定，不默认查询全部账号；公众号平台 ID 是 `weixin`，掘金是 `juejin`。CLI 按需连接用户已安装的扩展，不等于让代理操作扩展界面。
+
+新文章位于网站项目之外。导出时用 `--project` 指向实际网站项目，从那里读取 Astro 渲染依赖；图片仍相对于渠道稿解析，不相对于网站项目。示例中的文章标识需要替换：
+
+```sh
+article_dir='/Users/magic/Documents/MagicArticle/<article-slug>'
+website_dir='/Users/magic/Desktop/reborn/magic-site'
+
+node /Users/magic/.codex/skills/blog-article-format/scripts/prepare_channel_sync.mjs \
+  juejin "$article_dir/juejin.md" "$article_dir/juejin-sync.html" --project "$website_dir"
+
+node /Users/magic/.codex/skills/blog-article-format/scripts/prepare_channel_sync.mjs \
+  wechat "$article_dir/wechat.md" "$article_dir/wechat-sync.html" --project "$website_dir"
+```
+
+导出检查通过后，再使用当前版本支持的 CLI 同步方式：
+
+```sh
+/Users/magic/.local/bin/wechatsync --timeout 45000 sync \
+  "$article_dir/juejin-sync.html" -p juejin --keep-image-layout \
+  --result-json /private/tmp/juejin-sync-result.json
+
+/Users/magic/.local/bin/wechatsync --timeout 45000 sync \
+  "$article_dir/wechat-sync.html" -p weixin \
+  --result-json /private/tmp/wechat-sync-result.json
+```
+
+示例结果文件为临时文件；同时处理多篇时用各自路径。将本次真实草稿链接和状态记入文章目录的发布记录，避免再打开旧稿。原版公众号适配器每次新建草稿；重复同步前核对已有结果，不因等待或重复查看制造多份草稿。图片上传或同步失败就停止后续发布，先定位并修复；遇到登录、权限或服务阻碍，说明具体缺口，不无限重试。
+
+### 图片尺寸与转换
+
+截图尺寸必须在源稿和实际平台稿中都合适。手机竖图可从约 300px 起调，后台宽图从 480–560px 起调，较长的订单截图适当收窄；这些是排版起点，不强制所有图片同宽。以文字可读、不过度占屏为准，窄屏允许缩到正文栏宽度。
+
+源稿使用带 `width` 和内联样式的 HTML 图片，并居中。例如：
+
+```html
+<div align="center">
+<img src="assets/phone.png" alt="测试购买结果" width="300" style="width:300px;max-width:100%;height:auto;display:block;margin:24px auto;" />
+</div>
+```
+
+不要只在本地预览的 CSS 中缩图。原版扩展上传图片时可能重建标签、删除宽度和样式，HTML 转 Markdown 也可能退回没有尺寸的 `![说明](地址)`。网页提取还会清理样式，因此不能拿网页看起来正常作为同步正确的证据。
+
+本机掘金兼容路径使用 `--keep-image-layout` 保留图片 HTML；该参数只用于单独同步掘金的 HTML。公众号由 CLI 预先上传本地图片、只替换地址，导出稿同时保留图片内联尺寸和对应样式。不要把掘金参数套到公众号，也不要修改原版扩展。工具升级时先验证转换结果，再做一次实际平台检查；微信实际检查由 Magic 完成。
+
+### 超链接与参考资料
+
+原版公众号适配器会移除非微信域名的链接标签，只留下文字。公众号外部参考因此采用正文编号、文末资料名称和完整可复制网址；地址不能只藏在 `href` 中。长网址应能换行，并保留完整路径、查询参数和锚点。
+
+`prepare_channel_sync.mjs` 会拒绝只有超链接、没有可见地址的公众号导出。不要通过删掉参考资料来使检查通过。转换后核对所有地址仍在；公众号不能直接点击的文字地址，明确告诉读者复制到浏览器打开。网站和掘金保留正常超链接，并检查实际保存稿中的目标地址。
+
+## 平台验收与发布
+
+### 掘金及其他非微信平台
+
+CLI 返回成功后，用 **Chrome Use** 打开本次返回的草稿链接。检查分类、标签、摘要和封面，保存并重新打开正文。从头到尾查看排版，核对图片数量、顺序、大小、比例、脱敏、代码和参考链接。图片有问题时运行下述测量检查，不能只凭同步成功提示判断。
+
+问题应修到渠道源稿或导出/转换环节，再通过 CLI 同步并复验；正常填写平台独有字段和点击发布在 Chrome 中完成。确认实际稿件没问题后继续发布，不重复询问已获授权的最终按钮。打开发布结果页，区分发布成功、审核中和公开可见，记录真实链接与状态。
+
+### 微信公众号
+
+代理完成本地自查和 CLI 同步后停止在草稿交接。给 Magic 本次草稿链接、`wechat-cover.png`、`wechat-summary.txt` 以及确实需要手动完成的字段。**微信由 Magic 自己审查和发布，代理不使用 Chrome Use 检查或操作微信后台。**
+
+根据 Magic 的反馈修复本地稿和可复用导出逻辑；需要再次同步时仍只用 CLI。没有收到 Magic 的实际验收结果前，记录“待用户审查”；本地预览、离线转换检查和其他平台通过都不能替代微信验收。
+
+### 平台图片验收
+
+以下测量由代理在非微信平台保存并重新打开草稿后取得。仅测量正文区域，不包括封面、头像或工具栏图标；尺寸基准来自已审查源稿，实际值必须来自平台 DOM，不能从源稿反填。
+
+临时 JSON 字段：`savedAndReloaded` 表示已经保存并重新打开，`contentWidth` 是正文栏宽度，`images` 按顺序包含每张图的 `width`、`height`、`naturalWidth`、`naturalHeight`、`complete`。不记录带签名的图片地址或凭据。
+
+```sh
+python3 /Users/magic/.codex/skills/blog-article-format/scripts/check_channel_images.py \
+  --source /已审查的渠道稿.md --measurements /临时目录/平台图片测量.json
+```
+
+脚本检查缺图、加载失败、尺寸丢失和比例失真，失败返回非零退出码。通过后仍需查看实际排版。纯文字文章跳过图片测量，但仍检查全文和链接；有图的文章不能因无法测量而标记通过。
+
+导出脚本或验收逻辑有改动时，运行本地回归检查；使用已安装依赖的网站项目，测试不连接平台：
+
+```sh
+ARTICLE_RENDER_PROJECT=/Users/magic/Desktop/reborn/magic-site python3 -B -m unittest discover \
+  -s /Users/magic/.codex/skills/blog-article-format/scripts -p 'test_*.py'
+```

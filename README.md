@@ -4,6 +4,19 @@
 
 本仓库是这些 Skills 的唯一事实来源。用户级安装使用符号链接指向仓库目录，更新时只需拉取本仓库，不复制 Skill 文件。
 
+## 显示名与内部名称
+
+日常 Skill 的显示名统一使用 `Daily · 用途`，便于与开发类的 `Magic` 名称区分。内部名称、目录、`$skill-name` 调用方式和符号链接保持稳定。
+
+| 显示名 | 内部名称 |
+| --- | --- |
+| Daily · 文章工作流 | `blog-article-format` |
+| Daily · 表达风格 | `magic-tone` |
+| Daily · 产物边界检查 | `artifact-boundary-review` |
+| Daily · 会话清理 | `codex-session-cleanup` |
+
+LifeOS 在自己的仓库维护，显示为 `Daily · 个人知识库`，内部名称仍为 `lifeos`。第三方插件与开发类 Skill 不使用本仓库的命名约定。
+
 ## Skills
 
 ### `artifact-boundary-review`
@@ -43,7 +56,9 @@
 
 维护网站文章母稿，按公众号、掘金等渠道调整结构、格式和素材。复用目标网站的内容 schema，区分本地草稿与已发布状态，并记录渠道稿对应的母稿版本。
 
-两个 Skill 可以协作：`magic-tone` 处理作者表达，`blog-article-format` 处理文章与渠道格式。文章和发布素材保存在目标内容仓库，Skill 仓库只保存可复用的写作指导。
+写文章以 `blog-article-format` 为入口，同时使用 `magic-tone` 校准表达。先讨论主题、审查网站母稿，再制作并自查渠道稿。渠道预览通过后，只用同步助手 CLI 分发；非微信平台用 Chrome Use 验收并发布，微信交给用户审查和发布。
+
+网站母稿保存在网站项目，新文章渠道稿和发布素材放在 `/Users/magic/Documents/MagicArticle/<article-slug>/`，公众号封面和摘要分别为 `wechat-cover.png`、`wechat-summary.txt`。Skill 仓库只保存可复用指导和检查脚本。
 
 ## 安装
 
@@ -75,10 +90,10 @@ git -C /absolute/path/MagicDailySkills pull --ff-only
 
 ## 使用
 
-起草个人文章并适配公众号：
+讨论个人文章主题并按审查流程推进：
 
 ```text
-$magic-tone 将这份独立 App 实践整理成网站母稿，再用 $blog-article-format 生成公众号稿。
+$blog-article-format 我想写这份独立 App 实践，先和我讨论内容，配合 $magic-tone，按母稿和渠道稿的审查流程推进。
 ```
 
 交付前检查本次产物：
@@ -125,6 +140,11 @@ MagicDailySkills/
 ├── blog-article-format/
 │   ├── SKILL.md
 │   ├── references/channel-editions.md
+│   ├── scripts/
+│   │   ├── prepare_channel_sync.mjs
+│   │   ├── check_channel_images.py
+│   │   ├── test_prepare_channel_sync.py
+│   │   └── test_check_channel_images.py
 │   └── agents/openai.yaml
 └── codex-session-cleanup/
     ├── SKILL.md
