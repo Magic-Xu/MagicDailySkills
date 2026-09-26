@@ -12,6 +12,7 @@ import secrets
 import stat
 import subprocess
 import sys
+import uuid
 from pathlib import Path
 
 
@@ -27,6 +28,7 @@ def parse_args() -> argparse.Namespace:
         description="Move verified Codex task directories into one macOS Trash batch."
     )
     parser.add_argument("--root", required=True, help="Canonical cleanup root")
+    parser.add_argument("--layout", choices=("projectless", "visualization"), default="projectless")
     parser.add_argument(
         "--path", action="append", required=True, dest="paths", help="Exact candidate path"
     )
@@ -100,7 +102,7 @@ def find_worktree_markers(candidate: Path) -> list[str]:
     return sorted(markers)
 
 
-def validate_candidate(path_text: str, root: Path, trash_root: Path) -> dict[str, object]:
+def validate_candidate(path_text: str, root: Path, trash_root: Path, layout: str = "projectless") -> dict[str, object]:
     input_path = Path(path_text)
     if not input_path.is_absolute():
         raise TrashMoveError(f"candidate path must be absolute: {path_text}")
@@ -112,17 +114,28 @@ def validate_candidate(path_text: str, root: Path, trash_root: Path) -> dict[str
         relative = source.relative_to(root)
     except ValueError as exc:
         raise TrashMoveError(f"candidate is outside cleanup root: {source}") from exc
-    if not strict_descendant(source, root) or len(relative.parts) != 2:
-        raise TrashMoveError(f"candidate is not exactly two levels below root: {source}")
-    date_name, task_name = relative.parts
-    if not DATE_RE.fullmatch(date_name) or not task_name:
-        raise TrashMoveError(f"candidate path does not match YYYY-MM-DD/task: {source}")
+    if layout not in ("projectless", "visualization"):
+        raise TrashMoveError(f"unsupported layout: {layout}")
+    depth = 2 if layout == "projectless" else 4
+    if not strict_descendant(source, root) or len(relative.parts) != depth:
+        raise TrashMoveError(f"candidate has invalid depth for {layout}: {source}")
+    task_name = relative.parts[-1]
+    date_name = "/".join(relative.parts[:-1])
+    iso_date = "-".join(relative.parts[:-1])
+    if not DATE_RE.fullmatch(iso_date) or not task_name:
+        raise TrashMoveError(f"candidate path has invalid date/task layout: {source}")
     try:
-        dt.date.fromisoformat(date_name)
+        dt.date.fromisoformat(iso_date)
+        if layout == "visualization" and str(uuid.UUID(task_name)) != task_name:
+            raise ValueError("noncanonical task UUID")
     except ValueError as exc:
-        raise TrashMoveError(f"candidate date layer is invalid: {source.parent}") from exc
-    date_layer = source.parent
-    entity_directory(date_layer, "candidate date layer")
+        raise TrashMoveError(f"candidate date layer is invalid or task UUID is invalid: {source}") from exc
+    for parent in source.parents:
+        if parent == root:
+            break
+        entity_directory(parent, "candidate date layer")
+        if path_entry_exists(parent / ".codex-keep"):
+            raise TrashMoveError(f"candidate is protected by .codex-keep: {parent}")
     if path_entry_exists(root / ".codex-keep") or path_entry_exists(
         source / ".codex-keep"
     ):
@@ -179,7 +192,7 @@ def write_manifest(batch: Path, root: Path, items: list[dict[str, object]], comp
     return manifest
 
 
-def move_candidates(root_input: Path, path_texts: list[str], trash_root_input: Path) -> dict[str, object]:
+def move_candidates(root_input: Path, path_texts: list[str], trash_root_input: Path, layout: str = "projectless") -> dict[str, object]:
     if not root_input.is_absolute():
         raise TrashMoveError(f"cleanup root must be absolute: {root_input}")
     entity_directory(root_input, "cleanup root")
@@ -191,7 +204,7 @@ def move_candidates(root_input: Path, path_texts: list[str], trash_root_input: P
     if len(set(path_texts)) != len(path_texts):
         raise TrashMoveError("duplicate candidate path")
 
-    candidates = [validate_candidate(path, root, trash_root) for path in path_texts]
+    candidates = [validate_candidate(path, root, trash_root, layout) for path in path_texts]
     canonical_sources = [str(item["source"]) for item in candidates]
     if len(set(canonical_sources)) != len(canonical_sources):
         raise TrashMoveError("duplicate canonical candidate path")
@@ -215,9 +228,10 @@ def move_candidates(root_input: Path, path_texts: list[str], trash_root_input: P
                 raise TrashMoveError(f"candidate became protected before move: {source}")
             if find_worktree_markers(source):
                 raise TrashMoveError(f"candidate gained a .git file/worktree marker: {source}")
+            validate_candidate(str(source), root, trash_root, layout)
 
             date_destination = batch / str(candidate["date_name"])
-            date_destination.mkdir(mode=0o700, exist_ok=True)
+            date_destination.mkdir(mode=0o700, parents=True, exist_ok=True)
             destination = date_destination / str(candidate["task_name"])
             if destination.exists() or destination.is_symlink():
                 raise TrashMoveError(f"Trash destination already exists: {destination}")
@@ -262,7 +276,7 @@ def move_candidates(root_input: Path, path_texts: list[str], trash_root_input: P
 def main() -> int:
     args = parse_args()
     try:
-        result = move_candidates(Path(args.root), args.paths, Path.home() / ".Trash")
+        result = move_candidates(Path(args.root), args.paths, Path.home() / ".Trash", args.layout)
     except (OSError, TrashMoveError) as exc:
         result = {"ok": False, "error": str(exc), "moved": [], "unmoved": args.paths}
     json.dump(result, sys.stdout, ensure_ascii=False, indent=2)

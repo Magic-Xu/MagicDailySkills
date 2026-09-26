@@ -1,4 +1,4 @@
 interface:
   display_name: "Daily · 会话清理"
-  short_description: "按日期将旧会话目录移入回收站，保护活跃任务与 Git 工作"
-  default_prompt: "使用 $codex-session-cleanup 仅盘点 30 天前的本地 Codex 会话目录。"
+  short_description: "按日期直接清理已核验的安全项，只列出待确认内容，保护任务成果与 Git 工作"
+  default_prompt: "使用 $codex-session-cleanup，按我指定的截止日期与范围清理：已核验的安全项直接处理，只列出需要确认的内容。"

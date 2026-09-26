@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
+import {formatWechat} from './wechat-layout.mjs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 const [channel, sourceArg, outputArg, ...options] = process.argv.slice(2);
-if (!['juejin', 'wechat'].includes(channel) || !sourceArg || !outputArg ||
-    (options.length && (options.length !== 2 || options[0] !== '--project' || !options[1]))) {
-  throw Error('用法：prepare_channel_sync.mjs juejin|wechat 渠道稿.md 导出稿.html [--project 网站项目目录]');
+const usage = '用法：prepare_channel_sync.mjs juejin|wechat 渠道稿.md 导出稿.html [--project 网站项目目录] [--require-intro|--allow-no-intro]';
+if (!['juejin', 'wechat'].includes(channel) || !sourceArg || !outputArg) throw Error(usage);
+let project = null, introOption = null;
+for (let i=0; i<options.length; i++) {
+  if (options[i]==='--project' && options[i+1] && !options[i+1].startsWith('--') && !project) project=path.resolve(options[++i]);
+  else if (['--require-intro','--allow-no-intro'].includes(options[i]) && channel==='wechat' && introOption===null) introOption=options[i];
+  else throw Error(usage);
 }
-const project = options.length ? path.resolve(options[1]) : null;
 const source = path.resolve(sourceArg), output = path.resolve(outputArg);
 const md = await fs.readFile(source, 'utf8');
 const heading = md.match(/^# (.+)\r?\n/);
@@ -54,6 +58,7 @@ html = html.replace(/<div align="center">\s*(<img\b[^>]+>)\s*<\/div>/gi, (block,
 });
 if (count !== (html.match(/<img\b/gi) || []).length) throw Error('有图片未生成可验证的导出块。');
 for (const match of html.matchAll(/<img\b[^>]+src="([^"]+)"/gi)) await fs.access(match[1].replaceAll('&amp;', '&'));
+if (channel === 'wechat') html = formatWechat(html, require('parse5'), {requireIntro:introOption==='--require-intro'});
 const css = channel === 'wechat' ? `<style>${styles.join('\n')}</style>` : '';
 await fs.mkdir(path.dirname(output), {recursive:true});
 await fs.writeFile(output, `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>${escape(heading[1])}</title></head><body>${css}${html}</body></html>`, {mode:0o600});

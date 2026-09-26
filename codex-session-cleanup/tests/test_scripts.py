@@ -165,6 +165,54 @@ class MoveToTrashTests(unittest.TestCase):
         with self.assertRaisesRegex(move_to_trash.TrashMoveError, "must be absolute"):
             move_to_trash.move_candidates(Path("sessions"), ["/tmp/task"], Path("/tmp"))
 
+    def test_visualization_preserves_date_and_task_hierarchy(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary).resolve()
+            root = base / "visualizations"
+            relative = Path("2026/01/02/019ff6af-db8f-7e93-a192-0d4d672cd62b")
+            candidate = root / relative
+            candidate.mkdir(parents=True)
+            (candidate / ".DS_Store").write_bytes(b"metadata")
+            trash = base / "Trash"
+            trash.mkdir()
+            result = move_to_trash.move_candidates(root, [str(candidate)], trash, "visualization")
+            self.assertTrue(result["ok"])
+            self.assertFalse(candidate.exists())
+            destination = Path(result["trash_batch"]) / relative
+            self.assertEqual((destination / ".DS_Store").read_bytes(), b"metadata")
+
+    def test_visualization_rejects_parent_and_symlink_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary).resolve()
+            root = base / "visualizations"
+            day = root / "2026/01/02"
+            day.mkdir(parents=True)
+            trash = base / "Trash"
+            trash.mkdir()
+            with self.assertRaises(move_to_trash.TrashMoveError):
+                move_to_trash.move_candidates(root, [str(day)], trash, "visualization")
+            target = base / "target"
+            target.mkdir()
+            candidate = day / "019ff6af-db8f-7e93-a192-0d4d672cd62b"
+            candidate.symlink_to(target, target_is_directory=True)
+            with self.assertRaises(move_to_trash.TrashMoveError):
+                move_to_trash.move_candidates(root, [str(candidate)], trash, "visualization")
+            self.assertTrue(candidate.is_symlink())
+            self.assertTrue(target.is_dir())
+
+    def test_visualization_rejects_protected_date_layer(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary).resolve()
+            root = base / "visualizations"
+            candidate = root / "2026/01/02/019ff6af-db8f-7e93-a192-0d4d672cd62b"
+            candidate.mkdir(parents=True)
+            (candidate.parent / ".codex-keep").touch()
+            trash = base / "Trash"
+            trash.mkdir()
+            with self.assertRaises(move_to_trash.TrashMoveError):
+                move_to_trash.move_candidates(root, [str(candidate)], trash, "visualization")
+            self.assertTrue(candidate.exists())
+
 
 if __name__ == "__main__":
     unittest.main()
