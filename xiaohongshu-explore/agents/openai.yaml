@@ -1,0 +1,4 @@
+interface:
+  display_name: "Daily · 小红书探索"
+  short_description: "围绕实际问题搜索小红书，交叉核对正文与评论，整理有来源的可用结论"
+  default_prompt: "用 $xiaohongshu-explore 探索我当前关心的问题，结合笔记正文、评论和必要的外部核实，整理关键发现、限制条件与下一步。"

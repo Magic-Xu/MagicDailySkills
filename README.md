@@ -14,10 +14,17 @@
 | Daily · 表达风格 | `magic-tone` |
 | Daily · 产物边界检查 | `artifact-boundary-review` |
 | Daily · 会话清理 | `codex-session-cleanup` |
+| Daily · 小红书探索 | `xiaohongshu-explore` |
 
 LifeOS 在自己的仓库维护，显示为 `Daily · LifeOS`，内部名称仍为 `lifeos`。第三方插件与开发类 Skill 不使用本仓库的命名约定。
 
 ## Skills
+
+### `xiaohongshu-explore`
+
+围绕实际问题搜索小红书，结合笔记正文、图片或视频中的关键信息，以及评论中的追问、更正和反面体验，整理有来源的结论。适用于旅居、消费、社群、办事经验、产品需求和内容选题探索。
+
+优先复用用户指定的已登录浏览器，按当前可用工具完成阅读。区分个人经历、经营账号信息与已核实事实，核对时间、适用条件和独立来源；按用户目标交付比较、关键发现或下一步验证方案。探索默认只搜索和读取，发布、联系商家或预订需有相应授权。
 
 ### `artifact-boundary-review`
 
@@ -76,6 +83,7 @@ ln -s /absolute/path/MagicDailySkills/artifact-boundary-review ~/.agents/skills/
 ln -s /absolute/path/MagicDailySkills/codex-session-cleanup ~/.agents/skills/codex-session-cleanup
 ln -s /absolute/path/MagicDailySkills/magic-tone ~/.agents/skills/magic-tone
 ln -s /absolute/path/MagicDailySkills/blog-article-format ~/.agents/skills/blog-article-format
+ln -s /absolute/path/MagicDailySkills/xiaohongshu-explore ~/.agents/skills/xiaohongshu-explore
 ```
 
 已有的 `~/.codex/skills` 安装也可用符号链接指向本仓库；同一个 Skill 保留一个发现入口即可。
@@ -89,6 +97,18 @@ git -C /absolute/path/MagicDailySkills pull --ff-only
 ```
 
 ## 使用
+
+围绕当前问题探索小红书：
+
+```text
+$xiaohongshu-explore 用已登录的 Chrome 比较这几个地方是否适合住一个月，重点查普通工作日的生活体验、短租条件和反面反馈，给我有来源的比较及试住方案。
+```
+
+也可以探索目标用户的问题：
+
+```text
+$xiaohongshu-explore 查找这类用户反复遇到的问题、已有解决办法和实际解决成本，区分已观察到的需求线索与待验证的产品假设。
+```
 
 讨论个人文章主题并按审查流程推进：
 
@@ -127,6 +147,9 @@ $codex-session-cleanup 仅盘点 2026-08-01 之前的会话目录，根目录是
 ```text
 MagicDailySkills/
 ├── README.md
+├── xiaohongshu-explore/
+│   ├── SKILL.md
+│   └── agents/openai.yaml
 ├── artifact-boundary-review/
 │   ├── SKILL.md
 │   ├── references/
