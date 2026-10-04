@@ -10,8 +10,9 @@
 
 | 显示名 | 内部名称 |
 | --- | --- |
-| Daily · 文章工作流 | `blog-article-format` |
+| Daily · 个人创作 | `magic-creation` |
 | Daily · 表达风格 | `magic-tone` |
+| Daily · 内容格式 | `magic-content-format` |
 | Daily · 产物边界检查 | `artifact-boundary-review` |
 | Daily · 会话清理 | `codex-session-cleanup` |
 | Daily · 小红书探索 | `xiaohongshu-explore` |
@@ -55,17 +56,21 @@ LifeOS 在自己的仓库维护，显示为 `Daily · LifeOS`，内部名称仍�
 
 该 Skill 需要能列出、归档 Codex 任务并操作本地文件的 Codex 桌面环境。缺少所需任务工具时，它会停止，不会根据目录名猜测任务状态。
 
+### `magic-content-format`
+
+按 Magic 的内容格式要求组织方案、行程、文档、报告、文章和较长答复：先放读者最需要的信息，控制密度，让段落、列表、表格和图示各有用途。精简时保留执行条件，更新时同步受影响的图文，并按交付载体检查实际呈现。
+
+支持按任务自动匹配，也可用 `$magic-content-format` 显式调用；个人文风由 `magic-tone` 负责，产物边界由 `artifact-boundary-review` 检查。
+
 ### `magic-tone`
 
 以 Magic 的个人表达起草、改写和校准文章：从真实经历和具体事实出发，表达有依据的个人判断，尊重读者的时间。以已发表文章为参照，按不同主题选择结构与节奏；只沉淀稳定的表达偏好。
 
-### `blog-article-format`
+### `magic-creation`
 
-维护网站文章母稿，按公众号、掘金等渠道调整结构、格式和素材。复用目标网站的内容 schema，区分本地草稿与已发布状态，并记录渠道稿对应的母稿版本。
+统一创作文章、随笔与真实到访足迹，按用户指定的类型写入飞书「个人创作」对应草稿分类；母稿和面向用户的操作说明均以飞书为入口。本机 `MagicPersonalIP/Blog/` 只保存素材、渠道稿、预览、缓存及发布记录，不纳入 Git。
 
-写文章以 `blog-article-format` 为入口，同时使用 `magic-tone` 校准表达。先讨论主题、审查网站母稿，再制作并自查渠道稿。渠道预览通过后，只用同步助手 CLI 分发；非微信平台用 Chrome Use 验收并发布，微信交给用户审查和发布。
-
-网站母稿保存在网站项目，新文章渠道稿和发布素材放在 `/Users/magic/Documents/MagicArticle/<article-slug>/`，公众号封面和摘要分别为 `wechat-cover.png`、`wechat-summary.txt`。Skill 仓库只保存可复用指导和检查脚本。
+创作、改稿和保存草稿不自动公开。网站与文章渠道按明确指令同步；随笔发布到 X 须本人明确要求，目标账号由本人提供。公众号继续由本人在后台审查发布。内容组织按需使用 `magic-content-format`，个人语气按需使用 `magic-tone`。
 
 ## 安装
 
@@ -82,7 +87,8 @@ mkdir -p ~/.agents/skills
 ln -s /absolute/path/MagicDailySkills/artifact-boundary-review ~/.agents/skills/artifact-boundary-review
 ln -s /absolute/path/MagicDailySkills/codex-session-cleanup ~/.agents/skills/codex-session-cleanup
 ln -s /absolute/path/MagicDailySkills/magic-tone ~/.agents/skills/magic-tone
-ln -s /absolute/path/MagicDailySkills/blog-article-format ~/.agents/skills/blog-article-format
+ln -s /absolute/path/MagicDailySkills/magic-content-format ~/.agents/skills/magic-content-format
+ln -s /absolute/path/MagicDailySkills/magic-creation ~/.agents/skills/magic-creation
 ln -s /absolute/path/MagicDailySkills/xiaohongshu-explore ~/.agents/skills/xiaohongshu-explore
 ```
 
@@ -98,6 +104,12 @@ git -C /absolute/path/MagicDailySkills pull --ff-only
 
 ## 使用
 
+整理信息顺序、密度和图文分工：
+
+```text
+$magic-content-format 精简这份文档，先放当前要执行的安排，删掉图表与正文的重复说明，并检查实际呈现。
+```
+
 围绕当前问题探索小红书：
 
 ```text
@@ -110,10 +122,10 @@ $xiaohongshu-explore 用已登录的 Chrome 比较这几个地方是否适合住
 $xiaohongshu-explore 查找这类用户反复遇到的问题、已有解决办法和实际解决成本，区分已观察到的需求线索与待验证的产品假设。
 ```
 
-讨论个人文章主题并按审查流程推进：
+创作文章、随笔或足迹并保存草稿：
 
 ```text
-$blog-article-format 我想写这份独立 App 实践，先和我讨论内容，配合 $magic-tone，按母稿和渠道稿的审查流程推进。
+$magic-creation 帮我把这段感悟写成随笔，保存到飞书「随笔／草稿」，先不发布。
 ```
 
 交付前检查本次产物：
@@ -156,11 +168,14 @@ MagicDailySkills/
 │   │   └── detailed-review.md
 │   └── agents/
 │       └── openai.yaml
+├── magic-content-format/
+│   ├── SKILL.md
+│   └── agents/openai.yaml
 ├── magic-tone/
 │   ├── SKILL.md
 │   ├── references/voice-examples.md
 │   └── agents/openai.yaml
-├── blog-article-format/
+├── magic-creation/
 │   ├── SKILL.md
 │   ├── references/channel-editions.md
 │   ├── scripts/

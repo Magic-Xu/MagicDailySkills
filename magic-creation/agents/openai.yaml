@@ -1,0 +1,4 @@
+interface:
+  display_name: "Daily · 个人创作"
+  short_description: "按指定类型创作文章、随笔或足迹，保存飞书草稿，并按明确指令发布"
+  default_prompt: "使用 $magic-creation，按我指定的文章、随笔或足迹类型完成创作，保存到飞书对应草稿分类；只有我明确要求发布时再执行。"
