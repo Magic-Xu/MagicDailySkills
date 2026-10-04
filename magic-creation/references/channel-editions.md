@@ -68,19 +68,18 @@
 
 每个平台使用各自已审查的稿件，显式指定目标；公众号 ID 为 `weixin`，掘金为 `juejin`。CLI 按需连接已安装扩展。
 
-导出脚本从 `--project` 指定的项目读取 Astro 渲染依赖；渠道稿可位于项目之外，图片路径相对于渠道稿解析。替换示例中的文章标识，并使用本次实际项目路径：
+导出脚本使用本 Skill 的锁定依赖，与网站框架版本独立。首次使用或锁文件变化后，在 Skill 目录运行 `npm ci --ignore-scripts --no-audit --no-fund`；旧调用的 `--project` 参数仍兼容。图片路径相对于渠道稿解析。替换示例中的文章标识：
 
 ```sh
-article_dir='/Users/magic/Documents/MagicArticle/<article-slug>'
-website_dir='/Users/magic/MagicDevProject/MagicPersonalIP/magic-site'
+article_dir='/Users/magic/MagicDevProject/MagicPersonalIP/Blog/articles/<article-slug>'
 
-node /Users/magic/.codex/skills/blog-article-format/scripts/prepare_channel_sync.mjs \
-  juejin "$article_dir/juejin.md" "$article_dir/juejin-sync.html" --project "$website_dir"
+node /Users/magic/.codex/skills/magic-creation/scripts/prepare_channel_sync.mjs \
+  juejin "$article_dir/juejin.md" "$article_dir/juejin-sync.html"
 
-node /Users/magic/.codex/skills/blog-article-format/scripts/prepare_channel_sync.mjs \
-  wechat "$article_dir/wechat.md" "$article_dir/wechat-sync.html" --project "$website_dir" --require-intro
+node /Users/magic/.codex/skills/magic-creation/scripts/prepare_channel_sync.mjs \
+  wechat "$article_dir/wechat.md" "$article_dir/wechat-sync.html" --require-intro
 
-node /Users/magic/.codex/skills/blog-article-format/scripts/render_wechat_preview.mjs \
+node /Users/magic/.codex/skills/magic-creation/scripts/render_wechat_preview.mjs \
   "$article_dir/wechat-sync.html"
 ```
 
@@ -93,14 +92,14 @@ node /Users/magic/.codex/skills/blog-article-format/scripts/render_wechat_previe
 ```sh
 /Users/magic/.local/bin/wechatsync --timeout 150000 sync \
   "$article_dir/juejin-sync.html" -p juejin --keep-image-layout \
-  --result-json /private/tmp/juejin-sync-result.json
+  --result-json "$article_dir/juejin-sync-result.json"
 
 /Users/magic/.local/bin/wechatsync --timeout 150000 sync \
   "$article_dir/wechat-sync.html" -p weixin \
-  --result-json /private/tmp/wechat-sync-result.json
+  --result-json "$article_dir/wechat-sync-result.json"
 ```
 
-结果文件使用本次任务的临时路径，发布记录保存真实草稿链接与状态。原版公众号适配器每次新建草稿，重复同步前核对已有结果，合并相关修复后再同步。连接、上传、转换或平台校验失败时先定位对应环节；遇到无法解决的登录、权限或服务阻碍，保留成果并说明缺口。工具切换与重试遵守当前权限边界。
+结果文件保存在本篇本机目录，发布记录汇总真实草稿链接与状态；后续同步保留仍有接续用途的上次结果。原版公众号适配器每次新建草稿，重复同步前核对已有结果，合并相关修复后再同步。连接、上传、转换或平台校验失败时先定位对应环节；遇到无法解决的登录、权限或服务阻碍，保留成果并说明缺口。工具切换与重试遵守当前权限边界。
 
 ### 图片尺寸与转换
 
@@ -143,7 +142,7 @@ CLI 成功后在 Chrome 打开本次返回的草稿，补齐当前平台需要�
 临时 JSON 包含 `savedAndReloaded`、正文宽度 `contentWidth`，以及按顺序排列的 `images`，每项含 `width`、`height`、`naturalWidth`、`naturalHeight`、`complete`。不记录凭据或带签名的图片地址。
 
 ```sh
-python3 /Users/magic/.codex/skills/blog-article-format/scripts/check_channel_images.py \
+python3 /Users/magic/.codex/skills/magic-creation/scripts/check_channel_images.py \
   --source /已审查的渠道稿.md --measurements /临时目录/平台图片测量.json
 ```
 
@@ -152,6 +151,6 @@ python3 /Users/magic/.codex/skills/blog-article-format/scripts/check_channel_ima
 导出或验收代码变动时运行相关回归检查，使用已有依赖、不连接平台：
 
 ```sh
-ARTICLE_RENDER_PROJECT=/Users/magic/MagicDevProject/MagicPersonalIP/magic-site python3 -B -m unittest discover \
-  -s /Users/magic/.codex/skills/blog-article-format/scripts -p 'test_*.py'
+python3 -B -m unittest discover \
+  -s /Users/magic/.codex/skills/magic-creation/scripts -p 'test_*.py'
 ```

@@ -1,4 +1,4 @@
-"""Offline export checks. Set ARTICLE_RENDER_PROJECT to an installed Astro project."""
+"""Offline export checks. ARTICLE_RENDER_PROJECT optionally exercises legacy callers."""
 import base64
 import json
 import os
@@ -40,7 +40,6 @@ class Content(HTMLParser):
             self.paragraph = None
 
 
-@unittest.skipUnless(os.environ.get('ARTICLE_RENDER_PROJECT'), 'Set ARTICLE_RENDER_PROJECT to an installed Astro project')
 class ExportTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix='article-export-')
@@ -60,7 +59,7 @@ class ExportTests(unittest.TestCase):
         source.write_text('# Export check\n\n' + body)
         result = subprocess.run([
             'node', str(Path(__file__).with_name('prepare_channel_sync.mjs')),
-            channel, str(source), str(self.output), '--project', os.environ['ARTICLE_RENDER_PROJECT'], *options,
+            channel, str(source), str(self.output), *(['--project', os.environ['ARTICLE_RENDER_PROJECT']] if os.environ.get('ARTICLE_RENDER_PROJECT') else []), *options,
         ], capture_output=True, text=True)
         return result
 

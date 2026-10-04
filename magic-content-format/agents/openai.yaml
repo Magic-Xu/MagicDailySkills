@@ -1,0 +1,4 @@
+interface:
+  display_name: "Daily · 内容格式"
+  short_description: "按 Magic 的要求安排信息顺序与密度，让图表、正文分工清楚，成稿简洁可读"
+  default_prompt: "用 $magic-content-format 整理这份内容，先放读者最需要的信息，去掉重复，选择合适的图表与段落，并检查实际呈现。"

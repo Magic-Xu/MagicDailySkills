@@ -1,4 +1,0 @@
-interface:
-  display_name: "Daily · 文章工作流"
-  short_description: "先审网站母稿与渠道稿，再通过 CLI 同步、验收并交付发布素材"
-  default_prompt: "使用 $blog-article-format，配合 $magic-tone，按这篇文章的目标、当前进度和交付范围继续完成写作或渠道工作。"

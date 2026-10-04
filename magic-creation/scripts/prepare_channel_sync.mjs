@@ -2,8 +2,8 @@
 import fs from 'node:fs/promises';
 import {formatWechat} from './wechat-layout.mjs';
 import path from 'node:path';
-import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
+import {createMarkdownProcessor} from '@astrojs/markdown-remark';
+import * as parse5 from 'parse5';
 const [channel, sourceArg, outputArg, ...options] = process.argv.slice(2);
 const usage = '用法：prepare_channel_sync.mjs juejin|wechat 渠道稿.md 导出稿.html [--project 网站项目目录] [--require-intro|--allow-no-intro]';
 if (!['juejin', 'wechat'].includes(channel) || !sourceArg || !outputArg) throw Error(usage);
@@ -17,13 +17,12 @@ const source = path.resolve(sourceArg), output = path.resolve(outputArg);
 const md = await fs.readFile(source, 'utf8');
 const heading = md.match(/^# (.+)\r?\n/);
 if (!heading) throw Error('渠道稿首行必须是已审查的文章标题。');
-const require = createRequire(project ? path.join(project, 'package.json') : source);
-const {createMarkdownProcessor} = await import(pathToFileURL(require.resolve('@astrojs/markdown-remark')).href);
+// --project remains accepted for existing callers; rendering uses this skill's locked dependencies.
 const processor = await createMarkdownProcessor({syntaxHighlight:false});
 let html = (await processor.render(md.slice(heading[0].length))).code;
 // The Wechatsync WeChat adapter strips external anchors. Keep their destinations in readable text.
 if (channel === 'wechat') {
-  const {parseFragment} = require('parse5');
+  const {parseFragment} = parse5;
   const external = new Set();
   const text = [];
   function visit(node) {
@@ -58,7 +57,7 @@ html = html.replace(/<div align="center">\s*(<img\b[^>]+>)\s*<\/div>/gi, (block,
 });
 if (count !== (html.match(/<img\b/gi) || []).length) throw Error('有图片未生成可验证的导出块。');
 for (const match of html.matchAll(/<img\b[^>]+src="([^"]+)"/gi)) await fs.access(match[1].replaceAll('&amp;', '&'));
-if (channel === 'wechat') html = formatWechat(html, require('parse5'), {requireIntro:introOption==='--require-intro'});
+if (channel === 'wechat') html = formatWechat(html, parse5, {requireIntro:introOption==='--require-intro'});
 const css = channel === 'wechat' ? `<style>${styles.join('\n')}</style>` : '';
 await fs.mkdir(path.dirname(output), {recursive:true});
 await fs.writeFile(output, `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>${escape(heading[1])}</title></head><body>${css}${html}</body></html>`, {mode:0o600});
