@@ -1,14 +1,15 @@
 # MagicDailySkills
 
-可独立安装的通用 Codex Skills，用于交付审查、会话目录清理与小红书研究。
+可独立安装的通用 Codex Skills，用于交付审查、会话目录清理、小红书研究与网站精修。
 
-本仓库是以下三个 Skill 的唯一源码。安装使用符号链接指向源码目录，按需选择，不复制文件。
+本仓库是以下四个 Skill 的唯一源码。安装使用符号链接指向源码目录，按需选择，不复制文件。
 
 | 显示名 | 内部名称 |
 | --- | --- |
 | Daily · 产物边界检查 | `artifact-boundary-review` |
 | Daily · 会话清理 | `codex-session-cleanup` |
 | Daily · 小红书探索 | `xiaohongshu-explore` |
+| Daily · 网站精修 | `website-refine` |
 
 ## Skills
 
@@ -47,6 +48,12 @@
 
 优先复用用户指定的已登录浏览器，按当前可用工具完成阅读。区分个人经历、经营账号信息与已核实事实，核对时间、适用条件和独立来源；按用户目标交付比较、关键发现或下一步验证方案。探索默认只搜索和读取，发布、联系商家或预订需有相应授权。
 
+### `website-refine`
+
+对已有个人网站、产品官网和落地页进行视觉与交互精修。结合网站目标与审美偏好，选择相关优秀作品作为参考，把问题诊断、实际修改、浏览器检查与持续迭代连成完整流程。
+
+覆盖排版、留白、视觉层级、色彩、动效、微交互、响应式和原创性，并按改动检查功能、可访问性与加载体验。交付可体验的预览、关键前后截图及验证范围；仅要求评审时保持只读。需要访问目标页面，实施时需要项目编辑与运行能力，视觉验收需要真实浏览器。
+
 ## 安装与更新
 
 克隆仓库，将示例中的源路径替换为本机真实绝对路径：
@@ -57,6 +64,7 @@ mkdir -p ~/.agents/skills
 ln -s /absolute/path/MagicDailySkills/artifact-boundary-review ~/.agents/skills/artifact-boundary-review
 ln -s /absolute/path/MagicDailySkills/codex-session-cleanup ~/.agents/skills/codex-session-cleanup
 ln -s /absolute/path/MagicDailySkills/xiaohongshu-explore ~/.agents/skills/xiaohongshu-explore
+ln -s /absolute/path/MagicDailySkills/website-refine ~/.agents/skills/website-refine
 ```
 
 只安装需要的 Skill。已有入口时先检查来源，同一个 Skill 在 `~/.agents/skills` 与 `~/.codex/skills` 中保留一个发现入口。新 Skill 未出现时，重启 Codex。
@@ -92,6 +100,13 @@ $xiaohongshu-explore 查找这类用户反复遇到的问题、已有解决办�
 ```
 
 探索需要当前可用的连接器、CLI 或浏览器；登录与账号由使用者自行配置。
+
+精修已有网站：
+
+```text
+$website-refine 精修这个产品官网。保留现有品牌色，让产品展示更突出、排版更克制，并完成桌面、移动端与关键交互验收。
+$website-refine 先评审这个个人网站，对照适合的优秀案例说明主要差距和建议，暂不修改。
+```
 
 ## 维护
 
