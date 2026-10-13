@@ -1,4 +1,0 @@
-interface:
-  display_name: "Daily · 表达风格"
-  short_description: "用 Magic 的个人表达起草与校准文章，保持事实、判断和语气一致"
-  default_prompt: "用 $magic-tone 校准这份文章的表达，让标题清楚、句子顺畅，并保留我的事实与判断。"
