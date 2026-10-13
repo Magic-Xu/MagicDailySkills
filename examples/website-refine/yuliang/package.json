@@ -1,0 +1,18 @@
+{
+  "name": "website-refine-example-yuliang",
+  "version": "1.0.0",
+  "private": true,
+  "description": "余量：website-refine 的多 AI 订阅用量概念官网示例",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node server.cjs",
+    "test": "node verify.cjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "playwright": "1.64.0"
+  }
+}
